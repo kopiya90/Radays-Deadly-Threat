@@ -430,7 +430,9 @@
             updateUI();
         }
         
-        function updateUI() { document.getElementById('goldAmount').innerText = playerData.gold; }
+        function updateUI() { 
+            document.getElementById('goldAmount').innerText = playerData.gold;
+        }
         
         function getItemBonusesForHero(heroKey) {
             let item = playerData.equipped[heroKey];
@@ -440,7 +442,7 @@
             return { hpBonus: 0, damageBonus: 0 };
         }
         
-        function getCurrentBonuses() { return getItemBonusesForHero(playerData.currentHero); }
+        function getCurrentBonuses() { return getItemBonusesForHero(playerData.currentHero || "tank"); }
         
         // ГЕРОИ
         function openHeroesScreen() {
@@ -489,14 +491,14 @@
         function openInventory() {
             let div = document.getElementById('inventoryItems');
             if(playerData.inventory.length === 0) {
-                div.innerHTML = '<div>📦 Инвентарь пуст</div><button id="backInv">Назад</button>';
+                div.innerHTML = '<div>📦 Инвентарь пуст</div><button id="backInv">Закрыть</button>';
                 document.getElementById('backInv').onclick = () => document.getElementById('inventoryModal').style.display = 'none';
             } else {
-                div.innerHTML = '<div style="margin-bottom:10px;">Выбери предмет:</div>';
+                div.innerHTML = '<div style="margin-bottom:10px;">Выбери предмет для экипировки:</div>';
                 playerData.inventory.forEach((item, idx) => {
                     let itemDiv = document.createElement('div');
                     itemDiv.className = 'shop-item';
-                    itemDiv.innerHTML = `${item.name} → Надеть на...`;
+                    itemDiv.innerHTML = `${item.name}`;
                     itemDiv.onclick = () => {
                         div.innerHTML = `<div>Надеть ${item.name} на:</div>
                             <button id="equipTank">🛡️ Айрон</button>
@@ -524,6 +526,60 @@
             updateUI();
             document.getElementById('inventoryModal').style.display = 'none';
             alert(`${item.name} надет на ${heroes[heroKey].name}!`);
+        }
+        
+        // МАГАЗИН
+        function openShop() {
+            let div = document.getElementById('shopItems');
+            div.innerHTML = '<div style="margin-bottom:10px;">Выбери предмет для покупки:</div>';
+            itemsList.forEach(item => {
+                let divItem = document.createElement('div');
+                divItem.className = 'shop-item';
+                divItem.innerHTML = `${item.name} — ${item.price}💰`;
+                divItem.onclick = () => {
+                    if (playerData.gold >= item.price) {
+                        playerData.gold -= item.price;
+                        playerData.inventory.push({...item});
+                        saveGame();
+                        updateUI();
+                        document.getElementById('shopModal').style.display = 'none';
+                        alert(`Куплен ${item.name}! Загляни в инвентарь (нижняя кнопка), чтобы надеть.`);
+                    } else {
+                        alert("Не хватает золота!");
+                    }
+                };
+                div.appendChild(divItem);
+            });
+            document.getElementById('shopModal').style.display = 'flex';
+        }
+        
+        // СУНДУКИ
+        function openBoxes() {
+            let boxDiv = document.getElementById('boxesContent');
+            boxDiv.innerHTML = '<p>🎁 Выбери сундук:</p><div class="shop-item" id="boxCommon">📦 Обычный (50 золота)</div><div class="shop-item" id="boxRare">✨ Редкий (150 золота)</div>';
+            document.getElementById('boxCommon').onclick = () => {
+                if(playerData.gold >= 50) {
+                    playerData.gold -= 50;
+                    let reward = Math.floor(Math.random() * 100) + 20;
+                    playerData.gold += reward;
+                    saveGame();
+                    updateUI();
+                    alert(`🎉 Ты получил ${reward} золота!`);
+                    document.getElementById('boxesModal').style.display = 'none';
+                } else alert("Не хватает золота!");
+            };
+            document.getElementById('boxRare').onclick = () => {
+                if(playerData.gold >= 150) {
+                    playerData.gold -= 150;
+                    let reward = Math.floor(Math.random() * 250) + 80;
+                    playerData.gold += reward;
+                    saveGame();
+                    updateUI();
+                    alert(`🌟 Ты получил ${reward} золота! 🌟`);
+                    document.getElementById('boxesModal').style.display = 'none';
+                } else alert("Не хватает золота!");
+            };
+            document.getElementById('boxesModal').style.display = 'flex';
         }
         
         // ВЫБОР ДУЭЛИ
@@ -561,7 +617,7 @@
             startDuel();
         }
         
-        // ДУЭЛЬ
+        // ДУЭЛЬ (механика)
         function updateDuelUI() {
             const hero = heroes[playerData.currentHero];
             const bonuses = getCurrentBonuses();
@@ -755,56 +811,7 @@
             document.getElementById('accountModal').style.display = 'flex';
         }
         
-        function openShop() {
-            let div = document.getElementById('shopItems');
-            div.innerHTML = '';
-            itemsList.forEach(item => {
-                let divItem = document.createElement('div');
-                divItem.className = 'shop-item';
-                divItem.innerHTML = `${item.name} — ${item.price}💰`;
-                divItem.onclick = () => {
-                    if (playerData.gold >= item.price) {
-                        playerData.gold -= item.price;
-                        playerData.inventory.push({...item});
-                        saveGame();
-                        updateUI();
-                        document.getElementById('shopModal').style.display = 'none';
-                        alert(`Куплен ${item.name}! Загляни в инвентарь чтобы надеть.`);
-                    } else alert("Не хватает золота!");
-                };
-                div.appendChild(divItem);
-            });
-            document.getElementById('shopModal').style.display = 'flex';
-        }
-        
-        function openBoxes() {
-            let boxDiv = document.getElementById('boxesContent');
-            boxDiv.innerHTML = '<p>🎁 Выбери сундук:</p><div class="shop-item" id="boxCommon">📦 Обычный (50 золота)</div><div class="shop-item" id="boxRare">✨ Редкий (150 золота)</div>';
-            document.getElementById('boxCommon').onclick = () => {
-                if(playerData.gold >= 50) {
-                    playerData.gold -= 50;
-                    let reward = Math.floor(Math.random() * 100) + 20;
-                    playerData.gold += reward;
-                    alert(`🎉 Ты получил ${reward} золота!`);
-                    saveGame();
-                    updateUI();
-                    document.getElementById('boxesModal').style.display = 'none';
-                } else alert("Не хватает золота!");
-            };
-            document.getElementById('boxRare').onclick = () => {
-                if(playerData.gold >= 150) {
-                    playerData.gold -= 150;
-                    let reward = Math.floor(Math.random() * 250) + 80;
-                    playerData.gold += reward;
-                    alert(`🌟 Ты получил ${reward} золота! 🌟`);
-                    saveGame();
-                    updateUI();
-                    document.getElementById('boxesModal').style.display = 'none';
-                } else alert("Не хватает золота!");
-            };
-            document.getElementById('boxesModal').style.display = 'flex';
-        }
-        
+        // НАЗНАЧЕНИЕ ОБРАБОТЧИКОВ
         document.getElementById('duelBtn').onclick = openSelectScreen;
         document.getElementById('heroesBtn').onclick = openHeroesScreen;
         document.getElementById('closeHeroesBtn').onclick = backToMenu;
