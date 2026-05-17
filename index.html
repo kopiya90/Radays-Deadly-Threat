@@ -32,11 +32,13 @@
         .bottom-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 20px; flex-wrap: wrap; }
         .menu-btn { background: #1e293b; border: 1px solid #334155; border-radius: 60px; padding: 12px 20px; cursor: pointer; text-align: center; flex: 1; }
         .gold { text-align: center; font-size: 1.2rem; margin: 15px 0; color: #fbbf24; }
-        .duel-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0f1e; z-index: 1000; overflow-y: auto; padding: 20px; }
-        .duel-hp-panel { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 30px; }
-        .duel-hp-card { background: #1e293b; border-radius: 24px; padding: 12px; text-align: center; flex: 1; }
-        .duel-hp-bar { background: #334155; border-radius: 10px; height: 10px; margin: 8px 0; }
+        .inventory { text-align: center; font-size: 0.8rem; color: #94a3b8; margin: 10px 0; }
+        .duel-screen, .radayse-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0f1e; z-index: 1000; overflow-y: auto; padding: 20px; }
+        .duel-hp-panel, .radayse-panel { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 30px; }
+        .duel-hp-card, .radayse-card { background: #1e293b; border-radius: 24px; padding: 12px; text-align: center; flex: 1; }
+        .duel-hp-bar, .radayse-bar { background: #334155; border-radius: 10px; height: 10px; margin: 8px 0; }
         .duel-hp-fill { background: #22c55e; height: 100%; width: 100%; transition: width 0.2s; }
+        .radayse-fill { background: #f97316; height: 100%; width: 100%; transition: width 0.2s; }
         .buff-indicator { background: #4ade80; color: #0a0f1e; padding: 4px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; display: inline-block; margin-top: 5px; }
         .damage-number { font-size: 3rem; font-weight: bold; text-align: center; margin: 20px 0; }
         .status-badge { text-align: center; padding: 10px; border-radius: 40px; margin: 15px auto; font-weight: bold; width: 80%; }
@@ -49,7 +51,8 @@
         .next-btn { background: linear-gradient(135deg, #3b82f6, #1e40af); }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; }
         .modal-content { background: #1e293b; border-radius: 32px; padding: 24px; width: 90%; max-width: 350px; text-align: center; }
-        @media (max-width: 600px) { .hero-select { flex-direction: column; } .duel-main-btn { font-size: 1.5rem; padding: 15px; } .duel-hp-panel { flex-direction: column; } }
+        .shop-item { background: #334155; margin: 10px 0; padding: 12px; border-radius: 28px; cursor: pointer; }
+        @media (max-width: 600px) { .hero-select, .duel-hp-panel, .radayse-panel { flex-direction: column; } .duel-main-btn { font-size: 1.5rem; padding: 15px; } }
     </style>
 </head>
 <body>
@@ -59,6 +62,7 @@
                 <h1>RADT</h1>
                 <div class="sub">Radayce: Deadly Threat</div>
                 <div class="gold">💰 ЗОЛОТО: <span id="goldAmount">0</span></div>
+                <div class="inventory" id="inventoryDisplay">🎒 Нет предметов</div>
                 <div class="hero-select" id="heroSelectMenu">
                     <div class="hero-option" data-hero="tank">🛡️ Айрон (Танк)</div>
                     <div class="hero-option" data-hero="mage">🔥 Спарк (Маг)</div>
@@ -103,14 +107,37 @@
         </div>
     </div>
 
+    <div id="radayseScreen" class="radayse-screen" style="display:none;">
+        <div class="container">
+            <div class="card">
+                <h2>🏛️ УДАР ПО РАДАЙСУ</h2>
+                <div class="radayse-panel">
+                    <div class="radayse-card">
+                        🏛️ ТВОЙ РАДАЙС
+                        <div class="radayse-bar"><div class="radayse-fill" id="radaysePlayerFill"></div></div>
+                        <span id="radaysePlayerHp">500</span>/500
+                    </div>
+                    <div class="radayse-card">
+                        🏛️ РАДАЙС ВРАГА
+                        <div class="radayse-bar"><div class="radayse-fill" id="radayseEnemyFill"></div></div>
+                        <span id="radayseEnemyHp">500</span>/500
+                    </div>
+                </div>
+                <div id="radayseHitInfo" style="text-align:center; margin:20px; font-size:1.2rem;"></div>
+                <button id="nextDuelAfterHitBtn" class="next-btn">⚔️ СЛЕДУЮЩАЯ ДУЭЛЬ</button>
+                <button id="exitAfterHitBtn" style="margin-top:10px;">🏠 В МЕНЮ</button>
+            </div>
+        </div>
+    </div>
+
     <div id="shopModal" class="modal"><div class="modal-content"><h3>🛒 МАГАЗИН</h3><div id="shopItems"></div><button id="closeShop">ЗАКРЫТЬ</button></div></div>
     <div id="boxesModal" class="modal"><div class="modal-content"><h3>📦 ЯЩИКИ</h3><p>Скоро!</p><button id="closeBoxes">ЗАКРЫТЬ</button></div></div>
 
     <script>
-        // ----- ТВОЯ ССЫЛКА НА GOOGLE APPS SCRIPT -----
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxChjJfJ9q7Z8VFFZ_rcs3DbVALwQR7tu2he5dBkowcYD8DLFp29lfPlO-xOXqzEwo/exec";
+        // ⬇️⬇️⬇️ СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ⬇️⬇️⬇️
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxyTJBM6pSSyUA5RewF_53tekW1D6IbAWfLkFZLYNcRgywZsNdfXYjKr-ut3xcNQPAk/exec";
+        // ⬆️⬆️⬆️ СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ⬆️⬆️⬆️
 
-        // ----- ГЕРОИ С РАЗНЫМИ КОМБО -----
         const heroes = {
             tank: { name: "🛡️ Айрон", maxHp: 1500, enemyName: "👹 Теневой Маг", enemyHp: 800,
                 combos: { "0,0,0": { name: "Боевой дух", effect: "damageBuff", value: 0.3, turns: 2 },
@@ -148,8 +175,6 @@
         let gold = 0;
         let currentHeroKey = "tank";
         let playerId = null;
-
-        // состояние дуэли
         let playerHP = 1500, enemyHP = 800, playerRadayse = 500, enemyRadayse = 500, currentCard = null;
         let activeBuff = { damageMult: 1.0, remainingTurns: 0, shield: 0, stun: false, stealth: false };
         let comboHistory = [], currentTurn = 1, waitingForInput = true, duelActive = true;
@@ -163,18 +188,9 @@
         }
 
         async function saveToCloud() {
-            const data = {
-                action: "save",
-                id: getPlayerId(),
-                gold: gold,
-                hero: currentHeroKey,
-                inventory_tank: JSON.stringify(inventory.tank),
-                inventory_mage: JSON.stringify(inventory.mage),
-                inventory_assassin: JSON.stringify(inventory.assassin)
-            };
-            try {
-                await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(data) });
-            } catch(e) { console.warn("save error", e); }
+            const data = { action: "save", id: getPlayerId(), gold: gold, hero: currentHeroKey,
+                inventory_tank: JSON.stringify(inventory.tank), inventory_mage: JSON.stringify(inventory.mage), inventory_assassin: JSON.stringify(inventory.assassin) };
+            try { await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(data) }); } catch(e) { console.warn(e); }
         }
 
         async function loadFromCloud() {
@@ -205,6 +221,9 @@
 
         function updateMenuUI() {
             document.getElementById('goldAmount').innerText = gold;
+            const inv = inventory[currentHeroKey];
+            const invText = inv.length ? inv.map(i => i.name).join(', ') : '🎒 Нет предметов';
+            document.getElementById('inventoryDisplay').innerHTML = invText;
         }
 
         function updateDuelUI() {
@@ -224,6 +243,13 @@
             else if (activeBuff.stealth) buffText = `🌙 Скрытность (${activeBuff.remainingTurns} хода)`;
             document.getElementById('duelPlayerBuff').innerHTML = buffText ? `<div class="buff-indicator">${buffText}</div>` : '';
             document.getElementById('comboCounter').innerHTML = `⚡ Комбо: ${comboHistory.length}/3`;
+        }
+
+        function updateRadayseUI() {
+            document.getElementById('radaysePlayerFill').style.width = `${(playerRadayse/500)*100}%`;
+            document.getElementById('radayseEnemyFill').style.width = `${(enemyRadayse/500)*100}%`;
+            document.getElementById('radaysePlayerHp').innerText = playerRadayse;
+            document.getElementById('radayseEnemyHp').innerText = enemyRadayse;
         }
 
         function getDamage(style) {
@@ -295,6 +321,20 @@
             document.getElementById('duelResultScreen').style.display = 'none';
             document.getElementById('menuScreen').style.display = 'none';
             document.getElementById('duelScreen').style.display = 'block';
+            document.getElementById('radayseScreen').style.display = 'none';
+        }
+
+        function showRadayseHit(dmg, isPlayerWin) {
+            if (isPlayerWin) {
+                enemyRadayse = Math.max(0, enemyRadayse - dmg);
+                document.getElementById('radayseHitInfo').innerHTML = `<div class="damage-number">💥 ${dmg} УРОНА!</div><div>Радайс врага: ${enemyRadayse + dmg} → ${enemyRadayse}</div>`;
+            } else {
+                playerRadayse = Math.max(0, playerRadayse - dmg);
+                document.getElementById('radayseHitInfo').innerHTML = `<div class="damage-number">💥 ${dmg} УРОНА!</div><div>Твой Радайс: ${playerRadayse + dmg} → ${playerRadayse}</div>`;
+            }
+            updateRadayseUI();
+            document.getElementById('duelScreen').style.display = 'none';
+            document.getElementById('radayseScreen').style.display = 'block';
         }
 
         function processTurn() {
@@ -348,36 +388,44 @@
         function nextTurn() {
             if (!duelActive) return;
             if (playerHP <= 0 || enemyHP <= 0) {
-                if (enemyHP <= 0) {
-                    let dmg = Math.floor(Math.random() * 100) + 1;
-                    enemyRadayse = Math.max(0, enemyRadayse - dmg);
-                    alert(`🏆 ПОБЕДА! Удар по Радайсу: ${dmg} урона! Радайс врага: ${enemyRadayse}`);
-                    if (enemyRadayse <= 0) { gold += 50; updateMenuUI(); saveToCloud(); alert(`🏆 ПОБЕДА В МАТЧЕ! +50 золота!`); document.getElementById('duelScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'block'; playerRadayse = 500; enemyRadayse = 500; return; }
-                } else { alert(`💀 ПОРАЖЕНИЕ... Твой герой пал`); document.getElementById('duelScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'block'; return; }
-                startDuel(); return;
+                if (enemyHP <= 0) { let dmg = Math.floor(Math.random() * 100) + 1; showRadayseHit(dmg, true); return; }
+                else { alert(`💀 ПОРАЖЕНИЕ... Твой герой пал`); backToMenu(); return; }
             }
             currentTurn++;
             if (currentTurn > 10) {
                 let playerPoints = Math.floor(playerHP / 10), enemyPoints = Math.floor(enemyHP / 10);
-                if (playerPoints > enemyPoints) { let dmg = Math.floor(Math.random() * 100) + 1; enemyRadayse = Math.max(0, enemyRadayse - dmg); alert(`🏆 ПОБЕДА ПО ОЧКАМ! Удар по Радайсу: ${dmg} урона!`); }
-                else { alert(`💀 ПОРАЖЕНИЕ ПО ОЧКАМ...`); document.getElementById('duelScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'block'; return; }
-                if (enemyRadayse <= 0) { gold += 50; updateMenuUI(); saveToCloud(); alert(`🏆 ПОБЕДА В МАТЧЕ! +50 золота!`); document.getElementById('duelScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'block'; playerRadayse = 500; enemyRadayse = 500; return; }
-                startDuel(); return;
+                if (playerPoints > enemyPoints) { let dmg = Math.floor(Math.random() * 100) + 1; showRadayseHit(dmg, true); return; }
+                else { alert(`💀 ПОРАЖЕНИЕ ПО ОЧКАМ...`); backToMenu(); return; }
             }
             waitingForInput = true; updateBuffTimer(); document.getElementById('turnNumber').innerText = currentTurn;
             document.getElementById('duelInputScreen').style.display = 'block'; document.getElementById('duelResultScreen').style.display = 'none';
             updateDuelUI();
         }
 
+        function backToMenu() {
+            document.getElementById('duelScreen').style.display = 'none';
+            document.getElementById('radayseScreen').style.display = 'none';
+            document.getElementById('menuScreen').style.display = 'block';
+            updateMenuUI();
+        }
+
+        function nextDuelAfterHit() {
+            if (enemyRadayse <= 0) { gold += 50; updateMenuUI(); saveToCloud(); alert(`🏆 ПОБЕДА В МАТЧЕ! +50 золота!`); backToMenu(); return; }
+            if (playerRadayse <= 0) { backToMenu(); return; }
+            startDuel();
+        }
+
         document.getElementById('duelBtn').onclick = startDuel;
-        document.getElementById('exitDuelBtn').onclick = () => { if (confirm("Выйти в меню?")) { document.getElementById('duelScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'block'; } };
+        document.getElementById('exitDuelBtn').onclick = () => { if (confirm("Выйти в меню?")) backToMenu(); };
+        document.getElementById('exitAfterHitBtn').onclick = backToMenu;
+        document.getElementById('nextDuelAfterHitBtn').onclick = nextDuelAfterHit;
         document.getElementById('duelConfirmBtn').onclick = () => { if (waitingForInput && duelActive) processTurn(); };
         document.getElementById('duelNextBtn').onclick = nextTurn;
 
         document.querySelectorAll('#heroSelectMenu .hero-option').forEach(opt => {
             opt.onclick = () => {
                 document.querySelectorAll('#heroSelectMenu .hero-option').forEach(o => o.classList.remove('selected'));
-                opt.classList.add('selected'); currentHeroKey = opt.dataset.hero; saveToCloud();
+                opt.classList.add('selected'); currentHeroKey = opt.dataset.hero; updateMenuUI(); saveToCloud();
             };
         });
         document.querySelector('#heroSelectMenu .hero-option').classList.add('selected');
@@ -385,10 +433,11 @@
         document.getElementById('shopBtn').onclick = () => {
             let div = document.getElementById('shopItems'); div.innerHTML = '';
             itemsList.forEach(item => {
-                let it = document.createElement('div'); it.className = 'shop-item'; it.style.background = '#334155'; it.style.margin = '10px 0'; it.style.padding = '12px'; it.style.borderRadius = '28px'; it.style.cursor = 'pointer';
-                it.innerHTML = `${item.name} — ${item.price}💰`;
-                it.onclick = () => { if (gold >= item.price) { gold -= item.price; inventory[currentHeroKey].push(item); updateMenuUI(); saveToCloud(); document.getElementById('shopModal').style.display = 'none'; } else alert("Не хватает золота!"); };
-                div.appendChild(it);
+                let owned = inventory[currentHeroKey].some(i => i.id === item.id);
+                let divItem = document.createElement('div'); divItem.className = 'shop-item';
+                divItem.innerHTML = `${item.name} — ${item.price}💰 ${owned ? '✅ Уже есть' : ''}`;
+                if (!owned) divItem.onclick = () => { if (gold >= item.price) { gold -= item.price; inventory[currentHeroKey].push(item); updateMenuUI(); saveToCloud(); document.getElementById('shopModal').style.display = 'none'; } else alert("Не хватает золота!"); };
+                div.appendChild(divItem);
             });
             document.getElementById('shopModal').style.display = 'flex';
         };
