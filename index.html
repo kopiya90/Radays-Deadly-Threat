@@ -18,10 +18,10 @@
         .card {
             background: rgba(30, 41, 59, 0.8);
             backdrop-filter: blur(8px);
-            border-radius: 28px;
-            padding: 20px;
+            border-radius: 32px;
+            padding: 24px;
             margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         h1 {
             font-size: 2rem;
@@ -30,7 +30,6 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            letter-spacing: 2px;
             margin-bottom: 5px;
         }
         .sub {
@@ -38,48 +37,135 @@
             color: #94a3b8;
             font-size: 0.7rem;
             margin-top: -8px;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            margin-bottom: 30px;
         }
-        .arena {
+        .hero-select {
             display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            text-align: center;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-        .hero {
-            flex: 1;
+        .hero-option {
             background: #1e293b;
-            border-radius: 24px;
-            padding: 16px;
+            border: 2px solid #334155;
+            border-radius: 40px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
         }
-        .hp-bar {
-            background: #334155;
-            border-radius: 20px;
-            height: 14px;
-            margin: 10px 0;
-            overflow: hidden;
+        .hero-option.selected {
+            background: #ef4444;
+            border-color: #fbbf24;
         }
-        .hp-fill {
-            background: #22c55e;
+        .duel-main-btn {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            border: none;
+            border-radius: 80px;
+            padding: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .bottom-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .menu-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 60px;
+            padding: 12px 20px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+        }
+        .gold {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 15px 0;
+            color: #fbbf24;
+        }
+        .duel-screen, .radayse-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            background: #0a0f1e;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .duel-hp-panel {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .duel-hp-card {
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 12px;
+            text-align: center;
+            flex: 1;
+        }
+        .duel-hp-bar {
+            background: #334155;
+            border-radius: 10px;
+            height: 10px;
+            margin: 8px 0;
+        }
+        .duel-hp-fill {
+            background: #22c55e;
+            height: 100%;
+            width: 100%;
             transition: width 0.2s;
         }
-        .card-info {
-            font-size: 0.8rem;
-            background: #0f172a;
-            padding: 12px;
+        .buff-indicator {
+            background: #4ade80;
+            color: #0a0f1e;
+            padding: 4px 8px;
             border-radius: 20px;
-            margin: 15px 0;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .damage-number {
+            font-size: 3rem;
+            font-weight: bold;
             text-align: center;
+            margin: 20px 0;
+        }
+        .status-badge {
+            text-align: center;
+            padding: 10px;
+            border-radius: 40px;
+            margin: 15px auto;
+            font-weight: bold;
+            width: 80%;
+        }
+        .status-badge.countered { background: #ef4444; }
+        .status-badge.bonus { background: #22c55e; }
+        .status-badge.neutral { background: #f97316; }
+        .combo-counter {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #fbbf24;
         }
         select, button {
             background: #334155;
             color: white;
-            border: 1px solid #475569;
-            border-radius: 40px;
-            padding: 12px 16px;
+            border: none;
+            border-radius: 60px;
+            padding: 14px;
             font-size: 1rem;
             width: 100%;
             margin: 8px 0;
@@ -89,210 +175,544 @@
             background: linear-gradient(135deg, #ef4444, #b91c1c);
             font-weight: bold;
         }
-        .log {
-            background: #0f172a;
-            border-radius: 20px;
-            padding: 12px;
-            font-family: monospace;
-            font-size: 0.75rem;
-            height: 180px;
-            overflow-y: auto;
+        .next-btn {
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
         }
-        .log div {
-            border-left: 3px solid #f97316;
-            padding-left: 10px;
-            margin-bottom: 6px;
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
         }
-        .vs {
-            font-size: 1.5rem;
-            align-self: center;
-            font-weight: bold;
-            color: #f97316;
-        }
-        .footer {
+        .modal-content {
+            background: #1e293b;
+            border-radius: 32px;
+            padding: 24px;
+            width: 90%;
+            max-width: 350px;
             text-align: center;
-            font-size: 0.65rem;
-            color: #475569;
-            margin-top: 15px;
+        }
+        .shop-item, .box-item {
+            background: #334155;
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 28px;
+            cursor: pointer;
         }
         @media (max-width: 600px) {
-            .arena { flex-direction: column; }
-            .vs { text-align: center; margin: 5px 0; }
+            .hero-select { flex-direction: column; }
+            .duel-main-btn { font-size: 1.5rem; padding: 15px; }
+            .duel-hp-panel { flex-direction: column; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="card">
-        <h1>RADT</h1>
-        <div class="sub">Radayce: Deadly Threat — дуэльный прототип</div>
-        <div class="card-info" id="cardInfo">🎲 Загрузка карты дуэли...</div>
-        <div class="arena">
-            <div class="hero"><h2>🛡️ Айрон</h2><div class="hp-bar"><div class="hp-fill" id="playerHpBar"></div></div><div id="playerHpText">1500 / 1500 HP</div></div>
-            <div class="vs">VS</div>
-            <div class="hero"><h2>👹 Теневой Маг</h2><div class="hp-bar"><div class="hp-fill" id="enemyHpBar"></div></div><div id="enemyHpText">800 / 800 HP</div></div>
+    <!-- МЕНЮ -->
+    <div id="menuScreen">
+        <div class="container">
+            <div class="card">
+                <h1>RADT</h1>
+                <div class="sub">Radayce: Deadly Threat</div>
+                <div class="gold">💰 ЗОЛОТО: <span id="goldAmount">0</span></div>
+                <div class="hero-select" id="heroSelectMenu">
+                    <div class="hero-option" data-hero="tank">🛡️ Айрон (Танк)</div>
+                    <div class="hero-option" data-hero="mage">🔥 Спарк (Маг)</div>
+                    <div class="hero-option" data-hero="assassin">🌙 Шейд (Убийца)</div>
+                </div>
+                <div class="duel-main-btn" id="duelBtn">⚔️ НАЧАТЬ ДУЭЛЬ</div>
+                <div class="bottom-buttons">
+                    <div class="menu-btn" id="shopBtn">🛒 МАГАЗИН</div>
+                    <div class="menu-btn" id="boxesBtn">📦 ЯЩИКИ</div>
+                    <div class="menu-btn" id="inventoryBtn">🎒 ИНВЕНТАРЬ</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card">
-        <label>⚔️ Твой ход — выбери действие:</label>
-        <select id="actionSelect"></select>
-        <button id="attackBtn">💥 НАНЕСТИ УДАР</button>
+    <!-- ЭКРАН ДУЭЛИ -->
+    <div id="duelScreen" class="duel-screen" style="display:none;">
+        <div class="container">
+            <div class="duel-hp-panel">
+                <div class="duel-hp-card">
+                    <div id="duelPlayerName">🛡️ Айрон</div>
+                    <div class="duel-hp-bar"><div class="duel-hp-fill" id="duelPlayerHpBar"></div></div>
+                    <span id="duelPlayerHp">1500</span>/<span id="duelPlayerMax">1500</span>
+                    <div id="duelPlayerBuff" style="height: 24px;"></div>
+                </div>
+                <div class="duel-hp-card">
+                    <div id="duelEnemyName">👹 Теневой Маг</div>
+                    <div class="duel-hp-bar"><div class="duel-hp-fill" id="duelEnemyHpBar"></div></div>
+                    <span id="duelEnemyHp">800</span>/800
+                </div>
+            </div>
+            <div class="combo-counter" id="comboCounter">⚡ Комбо: 0/3</div>
+            <div id="duelInputScreen">
+                <div class="info-panel" id="duelCardInfo" style="background:#0f172a; border-radius:20px; padding:12px; text-align:center; margin-bottom:15px;">🎲 Загрузка карты...</div>
+                <div style="text-align:center; font-size:1.2rem; margin:15px;">ХОД <span id="turnNumber">1</span> из 10</div>
+                <select id="duelActionSelect"></select>
+                <button id="duelConfirmBtn">💥 ПОДТВЕРДИТЬ ХОД</button>
+            </div>
+            <div id="duelResultScreen" style="display:none;">
+                <div id="duelResultBox" style="text-align:center;"></div>
+                <button id="duelNextBtn" class="next-btn">➡️ СЛЕДУЮЩИЙ ХОД</button>
+            </div>
+            <button id="exitDuelBtn" style="margin-top:20px; background:#475569;">🚪 ВЫЙТИ В МЕНЮ</button>
+        </div>
     </div>
 
-    <div class="card">
-        <div class="log" id="log"></div>
+    <!-- ЭКРАН УДАРА ПО РАДАЙСУ -->
+    <div id="radayseScreen" class="radayse-screen" style="display:none;">
+        <div class="container">
+            <div class="card" style="text-align:center;">
+                <h2>🏛️ УДАР ПО РАДАЙСУ</h2>
+                <div id="radayseHitInfo" style="font-size:2rem; margin:20px;">💥 0</div>
+                <div id="radayseRemaining" style="margin-bottom:20px;">Радайс врага: 500 → 500</div>
+                <button id="radayseNextBtn" class="next-btn">⚔️ СЛЕДУЮЩАЯ ДУЭЛЬ</button>
+                <button id="radayseExitBtn" style="margin-top:10px; background:#475569;">🏠 В МЕНЮ</button>
+            </div>
+        </div>
     </div>
-    <div class="footer">RADT — каждая дуэль уникальна</div>
-</div>
 
-<script>
-    // ----- ГЕРОИ -----
-    let playerHP = 1500;
-    let enemyHP = 800;
-    const playerMax = 1500;
-    const enemyMax = 800;
+    <!-- Модалки -->
+    <div id="shopModal" class="modal"><div class="modal-content"><h3>🛒 МАГАЗИН</h3><div id="shopItems"></div><button id="closeShop">ЗАКРЫТЬ</button></div></div>
+    <div id="boxesModal" class="modal"><div class="modal-content"><h3>📦 ЯЩИКИ</h3><div id="boxItems"></div><button id="closeBoxes">ЗАКРЫТЬ</button></div></div>
+    <div id="inventoryModal" class="modal"><div class="modal-content"><h3>🎒 ИНВЕНТАРЬ</h3><div id="inventoryList"></div><button id="closeInventory">ЗАКРЫТЬ</button></div></div>
 
-    // ----- СТИЛИ (атака/защита) -----
-    const styles = [
-        { name: "⚔️ Удар клинком", type: "attack", dmgType: "phys", min: 40, max: 90 },
-        { name: "🔥 Огненная стрела", type: "attack", dmgType: "magic", min: 45, max: 85 },
-        { name: "🛡️ Каменная броня", type: "defense", dmgType: "phys", min: 0, max: 0, effect: "defPhys" },
-        { name: "🔮 Магический щит", type: "defense", dmgType: "magic", min: 0, max: 0, effect: "defMagic" },
-        { name: "🧠 Блок заклинаний", type: "defense", dmgType: "spell", min: 0, max: 0, effect: "defSpell" },
-        { name: "💥 Сокрушитель", type: "attack", dmgType: "phys", min: 50, max: 100 }
-    ];
-
-    // ----- КАРТЫ ДУЭЛИ -----
-    const cards = [
-        { name: "🍄 Магические грибы", effect: "range", min: 5, max: 200 },
-        { name: "⚔️ Стальной ветер", effect: "physBonus", bonus: 0.3 },
-        { name: "🔮 Разрыв магии", effect: "noSpells" },
-        { name: "❄️ Вечная мерзлота", effect: "freeze" },
-        { name: "🛡️ Несокрушимость", effect: "halfDmg" }
-    ];
-
-    let currentCard = null;
-    let freezeNext = false;
-    let logDiv = document.getElementById('log');
-    let actionSelect = document.getElementById('actionSelect');
-
-    function addLog(msg) {
-        let entry = document.createElement('div');
-        entry.innerHTML = msg;
-        logDiv.appendChild(entry);
-        logDiv.scrollTop = logDiv.scrollHeight;
-    }
-
-    function updateUI() {
-        document.getElementById('playerHpBar').style.width = `${(playerHP/playerMax)*100}%`;
-        document.getElementById('enemyHpBar').style.width = `${(enemyHP/enemyMax)*100}%`;
-        document.getElementById('playerHpText').innerText = `${Math.max(0, playerHP)} / ${playerMax} HP`;
-        document.getElementById('enemyHpText').innerText = `${Math.max(0, enemyHP)} / ${enemyMax} HP`;
-    }
-
-    function getDamage(style, isPlayer) {
-        let min = style.min, max = style.max;
-        if (currentCard?.effect === "range") {
-            min = currentCard.min;
-            max = currentCard.max;
-        }
-        if (currentCard?.effect === "halfDmg") {
-            min = Math.floor(min / 2);
-            max = Math.floor(max / 2);
-        }
-        if (min === max) return min;
-        return Math.floor(Math.random() * (max - min + 1) + min);
-    }
-
-    function getMultiplier(playerStyle, enemyStyle) {
-        if (playerStyle.type === "attack" && playerStyle.dmgType === "phys" && enemyStyle.effect === "defPhys") return 0.5;
-        if (playerStyle.type === "attack" && playerStyle.dmgType === "phys" && enemyStyle.effect === "defMagic") return 1.5;
-        if (playerStyle.type === "attack" && playerStyle.dmgType === "magic" && enemyStyle.effect === "defMagic") return 0.5;
-        if (playerStyle.type === "attack" && playerStyle.dmgType === "magic" && enemyStyle.effect === "defPhys") return 1.5;
-        return 1.0;
-    }
-
-    function enemyChooseStyle() {
-        let r = Math.random();
-        if (currentCard?.effect === "noSpells") return styles[Math.floor(Math.random() * 4)]; // без заклинаний
-        if (r < 0.6) return styles[Math.floor(Math.random() * styles.length)];
-        return styles[0];
-    }
-
-    function startDuel() {
-        playerHP = playerMax;
-        enemyHP = enemyMax;
-        currentCard = cards[Math.floor(Math.random() * cards.length)];
-        document.getElementById('cardInfo').innerHTML = `🎴 КАРТА ДУЭЛИ: ${currentCard.name} — ${currentCard.effect === "range" ? `урон ${currentCard.min}-${currentCard.max}` : currentCard.effect}`;
-        freezeNext = false;
-        updateUI();
-        logDiv.innerHTML = '';
-        addLog(`⚔️ ДУЭЛЬ НАЧАЛАСЬ (RADT — Radayce: Deadly Threat)`);
-        addLog(`🎴 Карта: ${currentCard.name}`);
-    }
-
-    document.getElementById('attackBtn').onclick = () => {
-        if (playerHP <= 0 || enemyHP <= 0) {
-            addLog(`❌ Дуэль уже завершена. Обнови страницу для новой игры.`);
-            return;
+    <script>
+        // Google Sheets URL (твой скрипт)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxzQ4pRMVv1joqst59rDIQPDrsyemiShzUBLVXL8eJlPHQIhi03eVstjgGlZxmayzbZ/exec";
+        
+        // Генерация ID игрока
+        let playerId = localStorage.getItem("radt_player_id");
+        if (!playerId) {
+            playerId = "player_" + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem("radt_player_id", playerId);
         }
 
-        if (freezeNext) {
-            addLog(`❄️ Вечная мерзлота: ты пропускаешь ход!`);
-            freezeNext = false;
+        // ---------- ГЕРОИ ----------
+        const heroes = {
+            tank: { name: "🛡️ Айрон", maxHp: 1500, combos: { "0,0,0": { name: "Боевой дух", effect: "damageBuff", value: 0.3, turns: 2 }, "5,5,5": { name: "Каменная твердыня", effect: "shield", value: 100, turns: 2 } } },
+            mage: { name: "🔥 Спарк", maxHp: 800, combos: { "0,0,0": { name: "Огненный клинок", effect: "damageBuff", value: 0.25, turns: 2 }, "5,5,5": { name: "Вспышка", effect: "stun", turns: 1 } } },
+            assassin: { name: "🌙 Шейд", maxHp: 800, combos: { "0,0,0": { name: "Теневой удар", effect: "damageBuff", value: 0.3, turns: 2 }, "5,5,5": { name: "Уход в тень", effect: "stealth", turns: 1 } } }
+        };
+        const enemies = [
+            { name: "👹 Теневой Маг", hp: 800 },
+            { name: "🌲 Лесной Дух", hp: 700 },
+            { name: "⚙️ Железный Голем", hp: 1000 }
+        ];
+        const itemsList = [
+            { id: "hp1", name: "❤️ Малый камень здоровья", price: 50, effect: { type: "hp", value: 50 }, rarity: "common" },
+            { id: "hp2", name: "❤️ Большой камень здоровья", price: 100, effect: { type: "hp", value: 100 }, rarity: "rare" },
+            { id: "dmg1", name: "⚔️ Ржавый клинок", price: 60, effect: { type: "damage", value: 8 }, rarity: "common" },
+            { id: "dmg2", name: "⚔️ Клинок ярости", price: 120, effect: { type: "damage", value: 15 }, rarity: "rare" }
+        ];
+        const boxItems = [
+            { name: "Обычный ящик", price: 80, rarity: "common", drops: ["hp1", "dmg1"] },
+            { name: "Редкий ящик", price: 200, rarity: "rare", drops: ["hp2", "dmg2"] }
+        ];
+
+        let inventory = { tank: [], mage: [], assassin: [] };
+        let gold = 0;
+        let currentHeroKey = "tank";
+        let playerRadayse = 500;
+        let enemyRadayse = 500;
+        
+        // Состояние текущей дуэли
+        let currentEnemy = null;
+        let currentCard = null;
+        let playerHP = 1500;
+        let enemyHP = 800;
+        let activeBuff = { damageMult: 1.0, remainingTurns: 0, shield: 0, stun: false, stealth: false };
+        let comboHistory = [];
+        let currentTurn = 1;
+        let waitingForInput = true;
+        let duelActive = true;
+        
+        const styles = [
+            { name: "⚔️ Удар клинком", idx: 0, type: "attack", dmgType: "phys", min: 40, max: 90 },
+            { name: "🔥 Огненная стрела", idx: 1, type: "attack", dmgType: "magic", min: 45, max: 85 },
+            { name: "🛡️ Каменная броня", idx: 2, type: "defense", dmgType: "phys", min: 0, max: 0, effect: "defPhys" },
+            { name: "🔮 Магический щит", idx: 3, type: "defense", dmgType: "magic", min: 0, max: 0, effect: "defMagic" },
+            { name: "🧠 Блок заклинаний", idx: 4, type: "defense", dmgType: "spell", min: 0, max: 0, effect: "defSpell" },
+            { name: "💥 Сокрушитель", idx: 5, type: "attack", dmgType: "phys", min: 50, max: 100 }
+        ];
+        const cards = [
+            { name: "🍄 Магические грибы", effect: "range", min: 5, max: 200 },
+            { name: "⚔️ Стальной ветер", effect: "physBonus", bonus: 0.3 },
+            { name: "🔮 Разрыв магии", effect: "noSpells" },
+            { name: "🛡️ Несокрушимость", effect: "halfDmg" }
+        ];
+
+        // Сохранение в Google Sheets
+        async function saveToCloud() {
+            const data = {
+                action: "save",
+                playerId: playerId,
+                gold: gold,
+                tank: JSON.stringify(inventory.tank.map(i => i.id)),
+                mage: JSON.stringify(inventory.mage.map(i => i.id)),
+                assassin: JSON.stringify(inventory.assassin.map(i => i.id))
+            };
+            const params = new URLSearchParams(data);
+            try {
+                await fetch(SCRIPT_URL, { method: "POST", body: params, mode: "no-cors" });
+            } catch(e) { console.warn("Save error", e); }
+        }
+
+        // Загрузка из Google Sheets
+        async function loadFromCloud() {
+            try {
+                const resp = await fetch(`${SCRIPT_URL}?action=load&playerId=${playerId}`);
+                const text = await resp.text();
+                if (!text || text === "error") return;
+                const data = JSON.parse(text);
+                if (data.gold !== undefined) gold = data.gold;
+                if (data.tank) inventory.tank = JSON.parse(data.tank).map(id => itemsList.find(i => i.id === id)).filter(i => i);
+                if (data.mage) inventory.mage = JSON.parse(data.mage).map(id => itemsList.find(i => i.id === id)).filter(i => i);
+                if (data.assassin) inventory.assassin = JSON.parse(data.assassin).map(id => itemsList.find(i => i.id === id)).filter(i => i);
+                updateMenuUI();
+            } catch(e) { console.warn("Load error", e); }
+        }
+
+        function getItemBonuses() {
+            let hpBonus = 0, damageBonus = 0;
+            for (let item of inventory[currentHeroKey]) {
+                if (item.effect.type === "hp") hpBonus += item.effect.value;
+                if (item.effect.type === "damage") damageBonus += item.effect.value;
+            }
+            return { hpBonus, damageBonus };
+        }
+
+        function updateMenuUI() {
+            document.getElementById('goldAmount').innerText = gold;
+        }
+
+        function updateDuelUI() {
+            const hero = heroes[currentHeroKey];
+            const bonuses = getItemBonuses();
+            const maxHp = hero.maxHp + bonuses.hpBonus;
+            document.getElementById('duelPlayerName').innerHTML = hero.name;
+            document.getElementById('duelPlayerHp').innerText = Math.max(0, playerHP);
+            document.getElementById('duelPlayerMax').innerText = maxHp;
+            document.getElementById('duelPlayerHpBar').style.width = `${(playerHP / maxHp) * 100}%`;
+            document.getElementById('duelEnemyHp').innerText = Math.max(0, enemyHP);
+            document.getElementById('duelEnemyHpBar').style.width = `${(enemyHP / currentEnemy.hp) * 100}%`;
+            let buffText = "";
+            if (activeBuff.remainingTurns > 0 && activeBuff.damageMult > 1) buffText = `⚡ +${Math.round((activeBuff.damageMult-1)*100)}% урона (${activeBuff.remainingTurns} хода)`;
+            else if (activeBuff.shield > 0) buffText = `🛡️ Щит ${activeBuff.shield} HP`;
+            else if (activeBuff.stun) buffText = `😵 Враг оглушён!`;
+            else if (activeBuff.stealth) buffText = `🌙 Скрытность`;
+            document.getElementById('duelPlayerBuff').innerHTML = buffText ? `<div class="buff-indicator">${buffText}</div>` : '';
+            document.getElementById('comboCounter').innerHTML = `⚡ Комбо: ${comboHistory.length}/3`;
+        }
+
+        function getDamage(style) {
+            let min = style.min, max = style.max;
+            if (currentCard?.effect === "range") { min = currentCard.min; max = currentCard.max; }
+            if (currentCard?.effect === "halfDmg") { min = Math.floor(min / 2); max = Math.floor(max / 2); }
+            let dmg = Math.floor(Math.random() * (max - min + 1) + min);
+            dmg += getItemBonuses().damageBonus;
+            if (activeBuff.remainingTurns > 0 && activeBuff.damageMult > 1) dmg = Math.floor(dmg * activeBuff.damageMult);
+            return dmg;
+        }
+
+        function getMultiplier(playerStyle, enemyStyle) {
+            if (playerStyle.type === "attack" && playerStyle.dmgType === "phys" && enemyStyle.effect === "defPhys") return 0.5;
+            if (playerStyle.type === "attack" && playerStyle.dmgType === "phys" && enemyStyle.effect === "defMagic") return 1.5;
+            if (playerStyle.type === "attack" && playerStyle.dmgType === "magic" && enemyStyle.effect === "defMagic") return 0.5;
+            if (playerStyle.type === "attack" && playerStyle.dmgType === "magic" && enemyStyle.effect === "defPhys") return 1.5;
+            return 1.0;
+        }
+
+        function applyComboEffect(combo) {
+            if (combo.effect === "damageBuff") activeBuff = { damageMult: 1.0 + combo.value, remainingTurns: combo.turns, shield: 0, stun: false, stealth: false };
+            else if (combo.effect === "shield") activeBuff = { damageMult: 1.0, remainingTurns: combo.turns, shield: combo.value, stun: false, stealth: false };
+            else if (combo.effect === "stun") activeBuff = { damageMult: 1.0, remainingTurns: 0, shield: 0, stun: true, stealth: false };
+            else if (combo.effect === "stealth") activeBuff = { damageMult: 1.0, remainingTurns: combo.turns, shield: 0, stun: false, stealth: true };
+            updateDuelUI();
+        }
+
+        function processCombo(styleIdx, wasCountered) {
+            if (wasCountered) { comboHistory = []; updateDuelUI(); return false; }
+            comboHistory.push(styleIdx);
+            if (comboHistory.length > 3) comboHistory.shift();
+            updateDuelUI();
+            if (comboHistory.length === 3) {
+                const key = comboHistory.join(",");
+                const hero = heroes[currentHeroKey];
+                if (hero.combos[key]) {
+                    applyComboEffect(hero.combos[key]);
+                    comboHistory = [];
+                    updateDuelUI();
+                    return true;
+                }
+                comboHistory = [];
+                updateDuelUI();
+            }
+            return false;
+        }
+
+        function updateBuffTimer() {
+            if (activeBuff.remainingTurns > 0) {
+                activeBuff.remainingTurns--;
+                if (activeBuff.remainingTurns === 0) activeBuff = { damageMult: 1.0, remainingTurns: 0, shield: 0, stun: false, stealth: false };
+                else if (activeBuff.stun) activeBuff.stun = false;
+            }
+            updateDuelUI();
+        }
+
+        function enemyChooseStyle() {
+            if (currentCard?.effect === "noSpells") return styles[Math.floor(Math.random() * 4)];
+            return styles[Math.floor(Math.random() * styles.length)];
+        }
+
+        function startNewDuel() {
+            const hero = heroes[currentHeroKey];
+            const bonuses = getItemBonuses();
+            playerHP = hero.maxHp + bonuses.hpBonus;
+            currentEnemy = enemies[Math.floor(Math.random() * enemies.length)];
+            enemyHP = currentEnemy.hp;
+            currentCard = cards[Math.floor(Math.random() * cards.length)];
+            activeBuff = { damageMult: 1.0, remainingTurns: 0, shield: 0, stun: false, stealth: false };
+            comboHistory = [];
+            currentTurn = 1;
+            waitingForInput = true;
+            duelActive = true;
+            document.getElementById('duelEnemyName').innerHTML = currentEnemy.name;
+            document.getElementById('duelCardInfo').innerHTML = `🎴 КАРТА: ${currentCard.name} ${currentCard.effect === "range" ? `(урон ${currentCard.min}-${currentCard.max})` : ''}`;
+            document.getElementById('turnNumber').innerText = currentTurn;
+            updateDuelUI();
+            document.getElementById('duelInputScreen').style.display = 'block';
+            document.getElementById('duelResultScreen').style.display = 'none';
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('duelScreen').style.display = 'block';
+            document.getElementById('radayseScreen').style.display = 'none';
+        }
+
+        function showRadayseHit(dmg) {
+            enemyRadayse = Math.max(0, enemyRadayse - dmg);
+            document.getElementById('radayseHitInfo').innerHTML = `💥 ${dmg}`;
+            document.getElementById('radayseRemaining').innerHTML = `Радайс врага: ${enemyRadayse + dmg} → ${enemyRadayse}`;
+            document.getElementById('duelScreen').style.display = 'none';
+            document.getElementById('radayseScreen').style.display = 'block';
+        }
+
+        async function endDuel(winner) {
+            if (winner === 'player') {
+                let dmg = Math.floor(Math.random() * 100) + 1;
+                showRadayseHit(dmg);
+                if (enemyRadayse <= 0) {
+                    gold += 50;
+                    updateMenuUI();
+                    await saveToCloud();
+                    setTimeout(() => alert(`🏆 ПОБЕДА В МАТЧЕ! +50 золота!`), 50);
+                }
+            } else {
+                alert(`💀 ПОРАЖЕНИЕ... Твой герой пал`);
+                document.getElementById('duelScreen').style.display = 'none';
+                document.getElementById('menuScreen').style.display = 'block';
+            }
+        }
+
+        function processTurn() {
+            let playerStyle = styles[document.getElementById('duelActionSelect').value];
             let enemyStyle = enemyChooseStyle();
-            addLog(`👹 Теневой Маг использует ${enemyStyle.name} (урон 0, твой ход пропущен)`);
-            updateUI();
-            return;
+            let mult = getMultiplier(playerStyle, enemyStyle);
+            let playerDmg = 0, enemyDmg = 0;
+            let wasCountered = false;
+
+            if (activeBuff.stun) {
+                activeBuff.stun = false;
+                updateDuelUI();
+            } else {
+                if (playerStyle.type === "attack") {
+                    playerDmg = Math.floor(getDamage(playerStyle) * mult);
+                    if (currentCard?.effect === "physBonus" && playerStyle.dmgType === "phys") playerDmg = Math.floor(playerDmg * (1 + currentCard.bonus));
+                }
+                if (enemyStyle.type === "attack") {
+                    enemyDmg = getDamage(enemyStyle);
+                    if (currentCard?.effect === "physBonus" && enemyStyle.dmgType === "phys") enemyDmg = Math.floor(enemyDmg * (1 + currentCard.bonus));
+                }
+                if (playerStyle.type === "attack" && enemyStyle.type === "defense" &&
+                    ((playerStyle.dmgType === "phys" && enemyStyle.effect === "defPhys") || (playerStyle.dmgType === "magic" && enemyStyle.effect === "defMagic"))) {
+                    wasCountered = true;
+                    playerDmg = Math.floor(playerDmg * 0.5);
+                }
+            }
+            let comboActivated = processCombo(playerStyle.idx, wasCountered);
+            if (activeBuff.shield > 0) { enemyDmg = 0; activeBuff.shield = 0; }
+            if (activeBuff.stealth) { enemyDmg = 0; activeBuff.stealth = false; activeBuff.remainingTurns = 0; }
+            playerHP -= enemyDmg;
+            enemyHP -= playerDmg;
+            updateDuelUI();
+            let statusText = wasCountered ? "⚠️ ЗАКОНТРЕН!" : (playerStyle.type === "attack" ? "✅ НОРМАЛЬНО" : "🛡️ ЗАЩИТА");
+            let comboText = comboActivated ? `<div style="color:#fbbf24; margin:10px;">✨ КОМБО АКТИВИРОВАНО! ✨</div>` : "";
+            let resultHtml = `
+                <div style="font-size:1.3rem; margin:15px;">🎲 РЕЗУЛЬТАТ ХОДА ${currentTurn}</div>
+                <div>🗡️ Ты: ${playerStyle.name}</div>
+                <div>👹 Враг: ${enemyStyle.name}</div>
+                <div class="status-badge ${wasCountered ? 'countered' : (playerStyle.type === "attack" ? 'bonus' : 'neutral')}" style="margin:15px auto;">${statusText}</div>
+                ${comboText}
+                <div class="damage-number">💥 -${playerDmg}</div>
+                <div>Враг HP: ${enemyHP + playerDmg} → ${Math.max(0, enemyHP)}</div>
+                <div style="margin-top:10px;">💥 -${enemyDmg}</div>
+                <div>Твой HP: ${playerHP + enemyDmg} → ${Math.max(0, playerHP)}</div>
+            `;
+            document.getElementById('duelResultBox').innerHTML = resultHtml;
+            document.getElementById('duelInputScreen').style.display = 'none';
+            document.getElementById('duelResultScreen').style.display = 'block';
+            waitingForInput = false;
         }
 
-        let playerStyle = styles[actionSelect.value];
-        let enemyStyle = enemyChooseStyle();
-
-        let mult = getMultiplier(playerStyle, enemyStyle);
-        let playerDmg = 0, enemyDmg = 0;
-
-        if (playerStyle.type === "attack") {
-            playerDmg = Math.floor(getDamage(playerStyle, true) * mult);
-            if (currentCard?.effect === "physBonus" && playerStyle.dmgType === "phys") playerDmg = Math.floor(playerDmg * (1 + currentCard.bonus));
-            addLog(`🗡️ Ты: ${playerStyle.name} → урон ${playerDmg}`);
-        } else {
-            addLog(`🛡️ Ты: ${playerStyle.name} (защита, урон 0)`);
+        function nextTurn() {
+            if (!duelActive) return;
+            if (playerHP <= 0 || enemyHP <= 0) {
+                if (enemyHP <= 0) endDuel('player');
+                else endDuel('enemy');
+                return;
+            }
+            currentTurn++;
+            if (currentTurn > 10) {
+                let playerPoints = Math.floor(playerHP / 10);
+                let enemyPoints = Math.floor(enemyHP / 10);
+                if (playerPoints > enemyPoints) endDuel('player');
+                else if (enemyPoints > playerPoints) endDuel('enemy');
+                else {
+                    alert("Ничья! Начинается новая дуэль.");
+                    startNewDuel();
+                }
+                return;
+            }
+            waitingForInput = true;
+            updateBuffTimer();
+            document.getElementById('turnNumber').innerText = currentTurn;
+            document.getElementById('duelInputScreen').style.display = 'block';
+            document.getElementById('duelResultScreen').style.display = 'none';
+            updateDuelUI();
         }
 
-        if (enemyStyle.type === "attack") {
-            enemyDmg = getDamage(enemyStyle, false);
-            if (currentCard?.effect === "physBonus" && enemyStyle.dmgType === "phys") enemyDmg = Math.floor(enemyDmg * (1 + currentCard.bonus));
-            addLog(`👹 Враг: ${enemyStyle.name} → урон ${enemyDmg}`);
-        } else {
-            addLog(`🛡️ Враг: ${enemyStyle.name} (защита, урон 0)`);
+        async function onNextDuelClick() {
+            if (enemyRadayse <= 0) {
+                gold += 50;
+                updateMenuUI();
+                await saveToCloud();
+                alert(`🏆 ПОБЕДА В МАТЧЕ! +50 золота!`);
+                playerRadayse = 500;
+                enemyRadayse = 500;
+                document.getElementById('radayseScreen').style.display = 'none';
+                document.getElementById('menuScreen').style.display = 'block';
+            } else {
+                startNewDuel();
+            }
         }
 
-        playerHP -= enemyDmg;
-        enemyHP -= playerDmg;
-        updateUI();
-
-        addLog(`❤️ Твой HP: ${Math.max(0, playerHP)} | Враг HP: ${Math.max(0, enemyHP)}`);
-
-        if (currentCard?.effect === "freeze") {
-            freezeNext = true;
-            addLog(`❄️ Вечная мерзлота: следующий ход ты пропустишь!`);
+        async function onExitToMenu() {
+            if (enemyRadayse <= 0) {
+                gold += 50;
+                updateMenuUI();
+                await saveToCloud();
+                alert(`🏆 ПОБЕДА В МАТЧЕ! +50 золота!`);
+                playerRadayse = 500;
+                enemyRadayse = 500;
+            }
+            document.getElementById('radayseScreen').style.display = 'none';
+            document.getElementById('menuScreen').style.display = 'block';
         }
 
-        if (playerHP <= 0 && enemyHP <= 0) addLog(`💀 НИЧЬЯ! Оба пали в бою 💀`);
-        else if (playerHP <= 0) addLog(`💀 ПОРАЖЕНИЕ... Твой герой повержен 💀`);
-        else if (enemyHP <= 0) addLog(`🏆 ПОБЕДА! Враг уничтожен! Слава RADT! 🏆`);
-    };
+        async function saveAndCloseModal(modalId) {
+            await saveToCloud();
+            document.getElementById(modalId).style.display = 'none';
+        }
 
-    styles.forEach((s, idx) => {
-        let opt = document.createElement('option');
-        opt.value = idx;
-        opt.text = s.name;
-        actionSelect.appendChild(opt);
-    });
+        // Инициализация обработчиков
+        document.getElementById('duelBtn').onclick = () => { playerRadayse = 500; enemyRadayse = 500; startNewDuel(); };
+        document.getElementById('exitDuelBtn').onclick = () => { if (confirm("Выйти в меню?")) { document.getElementById('duelScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'block'; } };
+        document.getElementById('duelConfirmBtn').onclick = () => { if (waitingForInput && duelActive) processTurn(); };
+        document.getElementById('duelNextBtn').onclick = nextTurn;
+        document.getElementById('radayseNextBtn').onclick = onNextDuelClick;
+        document.getElementById('radayseExitBtn').onclick = onExitToMenu;
 
-    startDuel();
-</script>
+        document.querySelectorAll('#heroSelectMenu .hero-option').forEach(opt => {
+            opt.onclick = () => {
+                document.querySelectorAll('#heroSelectMenu .hero-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                currentHeroKey = opt.dataset.hero;
+            };
+        });
+        document.querySelector('#heroSelectMenu .hero-option').classList.add('selected');
+
+        document.getElementById('shopBtn').onclick = () => {
+            let div = document.getElementById('shopItems');
+            div.innerHTML = '';
+            itemsList.forEach(item => {
+                let it = document.createElement('div');
+                it.className = 'shop-item';
+                it.innerHTML = `${item.name} — ${item.price}💰`;
+                it.onclick = async () => {
+                    if (gold >= item.price) {
+                        gold -= item.price;
+                        inventory[currentHeroKey].push(item);
+                        updateMenuUI();
+                        await saveToCloud();
+                        document.getElementById('shopModal').style.display = 'none';
+                    } else alert("Не хватает золота!");
+                };
+                div.appendChild(it);
+            });
+            document.getElementById('shopModal').style.display = 'flex';
+        };
+        document.getElementById('closeShop').onclick = () => saveAndCloseModal('shopModal');
+        document.getElementById('boxesBtn').onclick = () => {
+            let div = document.getElementById('boxItems');
+            div.innerHTML = '';
+            boxItems.forEach(box => {
+                let bx = document.createElement('div');
+                bx.className = 'box-item';
+                bx.innerHTML = `${box.name} — ${box.price}💰 (${box.rarity})`;
+                bx.onclick = async () => await openBox(box);
+                div.appendChild(bx);
+            });
+            document.getElementById('boxesModal').style.display = 'flex';
+        };
+        document.getElementById('closeBoxes').onclick = () => saveAndCloseModal('boxesModal');
+        document.getElementById('inventoryBtn').onclick = () => {
+            let div = document.getElementById('inventoryList');
+            div.innerHTML = inventory[currentHeroKey].length ? inventory[currentHeroKey].map(i => `<div class="shop-item">${i.name}</div>`).join('') : "<div>Пусто</div>";
+            document.getElementById('inventoryModal').style.display = 'flex';
+        };
+        document.getElementById('closeInventory').onclick = () => document.getElementById('inventoryModal').style.display = 'none';
+
+        styles.forEach(s => {
+            let opt = document.createElement('option');
+            opt.value = s.idx;
+            opt.text = s.name;
+            document.getElementById('duelActionSelect').appendChild(opt);
+        });
+
+        async function openBox(box) {
+            if (gold < box.price) { alert("Не хватает золота!"); return; }
+            gold -= box.price;
+            let dropId = box.drops[Math.floor(Math.random() * box.drops.length)];
+            let dropItem = itemsList.find(i => i.id === dropId);
+            if (dropItem) {
+                inventory[currentHeroKey].push(dropItem);
+                alert(`📦 Выпало: ${dropItem.name}!`);
+                updateMenuUI();
+                await saveToCloud();
+                document.getElementById('boxesModal').style.display = 'none';
+            }
+        }
+
+        window.addEventListener('load', async () => {
+            await loadFromCloud();
+            updateMenuUI();
+        });
+    </script>
 </body>
 </html>
