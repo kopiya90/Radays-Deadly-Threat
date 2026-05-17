@@ -77,7 +77,6 @@
             padding: 10px;
             border-radius: 60px;
         }
-        .inventory { text-align: center; font-size: 0.8rem; color: #94a3b8; margin: 10px 0; word-break: break-word; }
         
         .duel-main-btn {
             background: linear-gradient(135deg, #ef4444, #b91c1c);
@@ -97,6 +96,52 @@
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
         .duel-main-btn:active { transform: scale(0.98); }
+        
+        /* Экран героев */
+        .heroes-grid {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .hero-tab {
+            flex: 1;
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 40px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .hero-tab.active {
+            background: #ef4444;
+            border-color: #fbbf24;
+        }
+        .hero-detail-card {
+            background: #1e293b;
+            border-radius: 28px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #fbbf24;
+        }
+        .equipped-item {
+            background: #334155;
+            border-radius: 20px;
+            padding: 8px 12px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .unequip-btn {
+            background: #ef4444;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+        }
         
         /* Экран выбора дуэли */
         .select-screen {
@@ -136,7 +181,6 @@
             cursor: pointer;
             text-align: center;
             font-weight: bold;
-            transition: all 0.2s;
         }
         .hero-select-btn.selected {
             background: #ef4444;
@@ -152,7 +196,6 @@
         }
         .hero-card h3 { margin: 0 0 10px 0; color: #fbbf24; }
         .hero-stat { margin: 8px 0; font-size: 0.95rem; }
-        .combo-list { font-size: 0.8rem; color: #94a3b8; margin-top: 10px; }
         
         .confirm-btn {
             background: linear-gradient(135deg, #22c55e, #16a34a);
@@ -160,7 +203,7 @@
             padding: 18px;
         }
         
-        /* Остальные экраны */
+        /* Дуэль */
         .duel-screen, .radayse-screen {
             position: fixed;
             top: 0;
@@ -182,7 +225,7 @@
         select, button { background: #334155; color: white; border: none; border-radius: 60px; padding: 14px; font-size: 1rem; width: 100%; margin: 8px 0; cursor: pointer; }
         button { background: linear-gradient(135deg, #ef4444, #b91c1c); font-weight: bold; }
         .next-btn { background: linear-gradient(135deg, #3b82f6, #1e40af); }
-        .buff-indicator { background: #4ade80; color: #0a0f1e; padding: 4px 8px; border-radius: 20px; font-size: 0.7rem; display: inline-block; }
+        .buff-indicator { background: #4ade80; color: #0a0f1e; padding: 4px 8px; border-radius: 20px; display: inline-block; }
         
         .modal {
             display: none;
@@ -208,7 +251,7 @@
         .shop-item, .inv-item { background: #334155; margin: 10px 0; padding: 12px; border-radius: 28px; cursor: pointer; }
         
         @media (max-width: 600px) {
-            .heroes-row { flex-direction: column; }
+            .heroes-row, .heroes-grid { flex-direction: column; }
             .duel-main-btn { font-size: 1.5rem; padding: 18px; }
         }
     </style>
@@ -219,13 +262,12 @@
         <div class="container">
             <div class="top-bar">
                 <div class="top-btn" id="accountBtn">👤 Аккаунт</div>
-                <div class="top-btn" id="rewardsBtn">🎁 Награды</div>
+                <div class="top-btn" id="heroesBtn">⚔️ Герои</div>
             </div>
             <div class="card">
                 <h1>⚔️ RADT ⚔️</h1>
                 <div class="sub">Radayce: Deadly Threat</div>
                 <div class="gold">💰 <span id="goldAmount">0</span> золота</div>
-                <div class="inventory" id="inventoryDisplay">🎒 Нет предметов</div>
                 <div class="duel-main-btn" id="duelBtn">⚔️ НАЧАТЬ ДУЭЛЬ</div>
             </div>
         </div>
@@ -233,6 +275,22 @@
             <button class="bottom-btn" id="shopBtn">🛒 Магазин</button>
             <button class="bottom-btn" id="inventoryBtn">🎒 Инвентарь</button>
             <button class="bottom-btn" id="boxesBtn">📦 Сундуки</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН ГЕРОЕВ -->
+    <div id="heroesScreen" class="select-screen" style="display:none;">
+        <div class="container">
+            <h2 style="text-align:center;">⚔️ ГЕРОИ</h2>
+            <div class="heroes-grid" id="heroesTabs">
+                <div class="hero-tab" data-hero="tank">🛡️ Айрон</div>
+                <div class="hero-tab" data-hero="mage">🔥 Спарк</div>
+                <div class="hero-tab" data-hero="assassin">🌙 Шейд</div>
+            </div>
+            <div id="heroDetail" class="hero-detail-card">
+                <!-- сюда будет подставляться карточка героя -->
+            </div>
+            <button id="closeHeroesBtn" style="margin-top:20px; background:#475569;">🏠 НАЗАД</button>
         </div>
     </div>
 
@@ -255,11 +313,11 @@
                 <div class="hero-stat">❤️ ХП: <span id="heroCardHp">1500</span></div>
                 <div class="hero-stat">⚡ Комбо "0,0,0": <span id="heroCombo1">Боевой дух (+30% урона 2 хода)</span></div>
                 <div class="hero-stat">⚡ Комбо "5,5,5": <span id="heroCombo2">Каменная твердыня (щит 100 HP)</span></div>
-                <div class="combo-list">💡 Комбо собирается из 3 одинаковых стилей подряд</div>
+                <div class="hero-stat">🎒 Экипировка: <span id="heroEquip">нет</span></div>
             </div>
             
             <button id="confirmHeroBtn" class="confirm-btn" style="display:none;">✅ ПОДТВЕРДИТЬ ВЫБОР</button>
-            <button id="backToMenuBtn" style="margin-top:10px; background:#475569;">🏠 ВЕРНУТЬСЯ</button>
+            <button id="backToMenuBtn" style="margin-top:10px; background:#475569;">🏠 НАЗАД</button>
         </div>
     </div>
 
@@ -320,7 +378,6 @@
 
     <!-- МОДАЛКИ -->
     <div id="accountModal" class="modal"><div class="modal-content"><h3>👤 АККАУНТ</h3><div id="accountStats"></div><input type="text" id="playerNameInput" placeholder="Новое имя"><button id="changeNameBtn">Сменить имя</button><button id="closeAccount">ЗАКРЫТЬ</button></div></div>
-    <div id="rewardsModal" class="modal"><div class="modal-content"><h3>🎁 НАГРАДЫ</h3><div id="dailyReward">📅 Ежедневный бонус: +50 золота</div><div id="winReward">🏆 За 5 побед: +100 золота</div><button id="closeRewards">ЗАКРЫТЬ</button></div></div>
     <div id="shopModal" class="modal"><div class="modal-content"><h3>🛒 МАГАЗИН</h3><div id="shopItems"></div><button id="closeShop">ЗАКРЫТЬ</button></div></div>
     <div id="inventoryModal" class="modal"><div class="modal-content"><h3>🎒 ИНВЕНТАРЬ</h3><div id="inventoryItems"></div><button id="closeInventory">ЗАКРЫТЬ</button></div></div>
     <div id="boxesModal" class="modal"><div class="modal-content"><h3>📦 СУНДУКИ</h3><div id="boxesContent"></div><button id="closeBoxes">ЗАКРЫТЬ</button></div></div>
@@ -333,8 +390,8 @@
             wins: 0,
             losses: 0,
             rating: 1000,
-            inventory: { tank: [], mage: [], assassin: [] },
-            currentHero: "tank"
+            inventory: [], // не надетые предметы
+            equipped: { tank: null, mage: null, assassin: null } // надетые предметы на каждого героя
         };
         
         const itemsList = [
@@ -371,11 +428,10 @@
         ];
         
         // Состояние дуэли
-        let playerHP = 1500, enemyHP = 800, playerRadayse = 500, enemyRadayse = 500, currentCard = null;
+        let playerHP = 1500, enemyHP = 800, playerRadayse = 500, enemyRadayse = 500, currentEventCard = null;
         let activeBuff = { damageMult: 1.0, remainingTurns: 0, shield: 0, stun: false, stealth: false };
         let comboHistory = [], currentTurn = 1, waitingForInput = true, duelActive = true;
         let selectedHeroForDuel = "tank";
-        let currentEventCard = null;
         
         // ========== СОХРАНЕНИЕ ==========
         function saveGame() {
@@ -386,7 +442,8 @@
             let saved = localStorage.getItem("radt_data");
             if(saved) {
                 playerData = JSON.parse(saved);
-                if(!playerData.inventory) playerData.inventory = { tank: [], mage: [], assassin: [] };
+                if(!playerData.inventory) playerData.inventory = [];
+                if(!playerData.equipped) playerData.equipped = { tank: null, mage: null, assassin: null };
                 if(!playerData.rating) playerData.rating = 1000;
             }
             updateUI();
@@ -394,36 +451,126 @@
         
         function updateUI() {
             document.getElementById('goldAmount').innerText = playerData.gold;
-            let inv = playerData.inventory[playerData.currentHero] || [];
-            document.getElementById('inventoryDisplay').innerHTML = inv.length ? inv.map(i => i.name).join(', ') : '🎒 Нет предметов';
         }
         
-        function getItemBonuses() {
-            let hpBonus = 0, damageBonus = 0;
-            let inv = playerData.inventory[playerData.currentHero] || [];
-            for(let item of inv) {
-                if(item.effect?.type === "hp") hpBonus += item.effect.value;
-                if(item.effect?.type === "damage") damageBonus += item.effect.value;
+        // Получение бонусов от экипированного предмета для конкретного героя
+        function getItemBonusesForHero(heroKey) {
+            let item = playerData.equipped[heroKey];
+            if(!item) return { hpBonus: 0, damageBonus: 0 };
+            if(item.effect.type === "hp") return { hpBonus: item.effect.value, damageBonus: 0 };
+            if(item.effect.type === "damage") return { hpBonus: 0, damageBonus: item.effect.value };
+            return { hpBonus: 0, damageBonus: 0 };
+        }
+        
+        // Для текущего выбранного героя в дуэли
+        function getCurrentBonuses() {
+            return getItemBonusesForHero(playerData.currentHero);
+        }
+        
+        // ========== ЭКРАН ГЕРОЕВ ==========
+        function openHeroesScreen() {
+            renderHeroDetail("tank");
+            document.querySelectorAll('.hero-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if(tab.dataset.hero === "tank") tab.classList.add('active');
+            });
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('heroesScreen').style.display = 'block';
+        }
+        
+        function renderHeroDetail(heroKey) {
+            const hero = heroes[heroKey];
+            const bonuses = getItemBonusesForHero(heroKey);
+            const totalHp = hero.maxHp + bonuses.hpBonus;
+            const damageBonus = bonuses.damageBonus;
+            const equippedItem = playerData.equipped[heroKey];
+            
+            let equipHtml = equippedItem ? 
+                `<div class="equipped-item">🎽 ${equippedItem.name} <button class="unequip-btn" onclick="unequipItem('${heroKey}')">Снять</button></div>` : 
+                '<div>❌ Нет предмета</div>';
+            
+            document.getElementById('heroDetail').innerHTML = `
+                <h3>${hero.name}</h3>
+                <div class="hero-stat">❤️ Базовое HP: ${hero.maxHp}</div>
+                <div class="hero-stat">✨ Бонус от предмета: ${damageBonus > 0 ? `+${damageBonus} урона` : (bonuses.hpBonus > 0 ? `+${bonuses.hpBonus} HP` : 'нет')}</div>
+                <div class="hero-stat">💚 Итоговое HP: ${totalHp}</div>
+                <div class="hero-stat">⚔️ Урон от предмета: +${damageBonus}</div>
+                <div class="hero-stat">⚡ Комбо "0,0,0": ${hero.combos["0,0,0"].desc}</div>
+                <div class="hero-stat">⚡ Комбо "5,5,5": ${hero.combos["5,5,5"].desc}</div>
+                <div class="hero-stat">🎒 Экипировка:</div>
+                ${equipHtml}
+            `;
+        }
+        
+        function unequipItem(heroKey) {
+            const item = playerData.equipped[heroKey];
+            if(item) {
+                playerData.inventory.push(item);
+                playerData.equipped[heroKey] = null;
+                saveGame();
+                renderHeroDetail(heroKey);
+                updateUI();
             }
-            return { hpBonus, damageBonus };
         }
         
-        // ========== ЭКРАН ВЫБОРА ==========
+        // ========== ИНВЕНТАРЬ С ЭКИПИРОВКОЙ ==========
+        function openInventory() {
+            let div = document.getElementById('inventoryItems');
+            if(playerData.inventory.length === 0) {
+                div.innerHTML = '<div>📦 Инвентарь пуст</div><button id="backInv">Назад</button>';
+                document.getElementById('backInv').onclick = () => document.getElementById('inventoryModal').style.display = 'none';
+            } else {
+                div.innerHTML = '<div style="margin-bottom:10px;">Выбери предмет:</div>';
+                playerData.inventory.forEach((item, idx) => {
+                    let itemDiv = document.createElement('div');
+                    itemDiv.className = 'shop-item';
+                    itemDiv.innerHTML = `${item.name} → Надеть на...`;
+                    itemDiv.onclick = () => {
+                        // Выбор героя для экипировки
+                        div.innerHTML = `<div>Надеть ${item.name} на:</div>
+                            <button id="equipTank">🛡️ Айрон</button>
+                            <button id="equipMage">🔥 Спарк</button>
+                            <button id="equipAssassin">🌙 Шейд</button>
+                            <button id="backEquip">Назад</button>`;
+                        document.getElementById('equipTank').onclick = () => equipItemToHero(item, 'tank', idx);
+                        document.getElementById('equipMage').onclick = () => equipItemToHero(item, 'mage', idx);
+                        document.getElementById('equipAssassin').onclick = () => equipItemToHero(item, 'assassin', idx);
+                        document.getElementById('backEquip').onclick = openInventory;
+                    };
+                    div.appendChild(itemDiv);
+                });
+            }
+            document.getElementById('inventoryModal').style.display = 'flex';
+        }
+        
+        function equipItemToHero(item, heroKey, inventoryIndex) {
+            // Если у героя уже есть предмет, снимаем его в инвентарь
+            if(playerData.equipped[heroKey]) {
+                playerData.inventory.push(playerData.equipped[heroKey]);
+            }
+            // Надеваем новый
+            playerData.equipped[heroKey] = item;
+            // Удаляем из инвентаря
+            playerData.inventory.splice(inventoryIndex, 1);
+            saveGame();
+            updateUI();
+            document.getElementById('inventoryModal').style.display = 'none';
+            alert(`${item.name} надет на ${heroes[heroKey].name}!`);
+        }
+        
+        // ========== ЭКРАН ВЫБОРА ДУЭЛИ ==========
         function openSelectScreen() {
-            // Выбираем случайную карту события
             currentEventCard = cards[Math.floor(Math.random() * cards.length)];
             document.getElementById('eventName').innerHTML = currentEventCard.name;
             document.getElementById('eventDesc').innerHTML = currentEventCard.desc;
             
-            // Сбрасываем выбор героя
-            selectedHeroForDuel = playerData.currentHero;
+            selectedHeroForDuel = playerData.currentHero || "tank";
             document.querySelectorAll('.hero-select-btn').forEach(btn => {
                 btn.classList.remove('selected');
                 if(btn.dataset.hero === selectedHeroForDuel) btn.classList.add('selected');
             });
             
-            // Показываем карточку выбранного героя
-            updateHeroCard(selectedHeroForDuel);
+            updateHeroCardForSelect(selectedHeroForDuel);
             document.getElementById('heroCard').style.display = 'block';
             document.getElementById('confirmHeroBtn').style.display = 'block';
             
@@ -431,14 +578,16 @@
             document.getElementById('selectScreen').style.display = 'block';
         }
         
-        function updateHeroCard(heroKey) {
+        function updateHeroCardForSelect(heroKey) {
             const hero = heroes[heroKey];
-            const bonuses = getItemBonuses();
+            const bonuses = getItemBonusesForHero(heroKey);
             const totalHp = hero.maxHp + bonuses.hpBonus;
+            const equippedItem = playerData.equipped[heroKey];
             document.getElementById('heroCardName').innerHTML = hero.name;
             document.getElementById('heroCardHp').innerHTML = totalHp;
             document.getElementById('heroCombo1').innerHTML = hero.combos["0,0,0"]?.desc || "—";
             document.getElementById('heroCombo2').innerHTML = hero.combos["5,5,5"]?.desc || "—";
+            document.getElementById('heroEquip').innerHTML = equippedItem ? equippedItem.name : "нет";
         }
         
         function startDuelAfterSelect() {
@@ -450,7 +599,7 @@
         // ========== ДУЭЛЬ (механика) ==========
         function updateDuelUI() {
             const hero = heroes[playerData.currentHero];
-            const bonuses = getItemBonuses();
+            const bonuses = getCurrentBonuses();
             const maxHp = hero.maxHp + bonuses.hpBonus;
             document.getElementById('duelPlayerName').innerHTML = hero.name;
             document.getElementById('duelPlayerHp').innerText = Math.max(0, playerHP);
@@ -472,7 +621,7 @@
             if (currentEventCard?.effect === "range") { min = currentEventCard.min; max = currentEventCard.max; }
             if (currentEventCard?.effect === "halfDmg") { min = Math.floor(min / 2); max = Math.floor(max / 2); }
             let dmg = Math.floor(Math.random() * (max - min + 1) + min);
-            dmg += getItemBonuses().damageBonus;
+            dmg += getCurrentBonuses().damageBonus;
             if (activeBuff.remainingTurns > 0 && activeBuff.damageMult > 1) dmg = Math.floor(dmg * activeBuff.damageMult);
             return Math.max(1, dmg);
         }
@@ -514,7 +663,7 @@
         
         function startDuel() {
             const hero = heroes[playerData.currentHero];
-            const bonuses = getItemBonuses();
+            const bonuses = getCurrentBonuses();
             playerHP = hero.maxHp + bonuses.hpBonus;
             enemyHP = hero.enemyHp;
             activeBuff = { damageMult: 1.0, remainingTurns: 0, shield: 0, stun: false, stealth: false };
@@ -623,6 +772,7 @@
             document.getElementById('selectScreen').style.display = 'none';
             document.getElementById('duelScreen').style.display = 'none';
             document.getElementById('radayseScreen').style.display = 'none';
+            document.getElementById('heroesScreen').style.display = 'none';
             document.getElementById('menuScreen').style.display = 'block';
             updateUI();
         }
@@ -639,52 +789,32 @@
             openSelectScreen();
         }
         
-        // ========== ИНТЕРФЕЙС ==========
+        // ========== ПРОЧИЙ ИНТЕРФЕЙС ==========
         function openAccount() {
             document.getElementById('accountStats').innerHTML = `👤 Имя: ${playerData.name}<br>🏆 Побед: ${playerData.wins}<br>💀 Поражений: ${playerData.losses}<br>⭐ Рейтинг: ${playerData.rating}`;
             document.getElementById('accountModal').style.display = 'flex';
-        }
-        
-        function openRewards() {
-            document.getElementById('rewardsModal').style.display = 'flex';
         }
         
         function openShop() {
             let div = document.getElementById('shopItems');
             div.innerHTML = '';
             itemsList.forEach(item => {
-                let owned = playerData.inventory[playerData.currentHero]?.some(i => i.id === item.id);
                 let divItem = document.createElement('div');
                 divItem.className = 'shop-item';
-                divItem.innerHTML = `${item.name} — ${item.price}💰 ${owned ? '✅ Уже есть' : ''}`;
-                if (!owned) divItem.onclick = () => {
+                divItem.innerHTML = `${item.name} — ${item.price}💰`;
+                divItem.onclick = () => {
                     if (playerData.gold >= item.price) {
                         playerData.gold -= item.price;
-                        playerData.inventory[playerData.currentHero].push(item);
+                        playerData.inventory.push({...item});
                         saveGame();
                         updateUI();
                         document.getElementById('shopModal').style.display = 'none';
+                        alert(`Куплен ${item.name}! Загляни в инвентарь чтобы надеть.`);
                     } else alert("Не хватает золота!");
                 };
                 div.appendChild(divItem);
             });
             document.getElementById('shopModal').style.display = 'flex';
-        }
-        
-        function openInventory() {
-            let div = document.getElementById('inventoryItems');
-            div.innerHTML = '<div style="margin-bottom:10px;">Выбери героя:</div>';
-            ['tank', 'mage', 'assassin'].forEach(heroKey => {
-                let btn = document.createElement('button');
-                btn.innerText = heroes[heroKey].name;
-                btn.onclick = () => {
-                    let inv = playerData.inventory[heroKey];
-                    div.innerHTML = `<div>🎒 Инвентарь ${heroes[heroKey].name}</div>${inv.length ? inv.map(i => `<div class="inv-item">${i.name}</div>`).join('') : '<div>Пусто</div>'}<button id="backInv">Назад</button>`;
-                    document.getElementById('backInv').onclick = openInventory;
-                };
-                div.appendChild(btn);
-            });
-            document.getElementById('inventoryModal').style.display = 'flex';
         }
         
         function openBoxes() {
@@ -717,6 +847,8 @@
         
         // ========== НАЗНАЧЕНИЕ ОБРАБОТЧИКОВ ==========
         document.getElementById('duelBtn').onclick = openSelectScreen;
+        document.getElementById('heroesBtn').onclick = openHeroesScreen;
+        document.getElementById('closeHeroesBtn').onclick = backToMenu;
         document.getElementById('exitDuelBtn').onclick = () => { if(confirm("Выйти в меню?")) backToMenu(); };
         document.getElementById('exitAfterHitBtn').onclick = backToMenu;
         document.getElementById('nextDuelAfterHitBtn').onclick = nextDuelAfterHit;
@@ -726,13 +858,11 @@
         document.getElementById('confirmHeroBtn').onclick = startDuelAfterSelect;
         
         document.getElementById('accountBtn').onclick = openAccount;
-        document.getElementById('rewardsBtn').onclick = openRewards;
         document.getElementById('shopBtn').onclick = openShop;
         document.getElementById('inventoryBtn').onclick = openInventory;
         document.getElementById('boxesBtn').onclick = openBoxes;
         
         document.getElementById('closeAccount').onclick = () => document.getElementById('accountModal').style.display = 'none';
-        document.getElementById('closeRewards').onclick = () => document.getElementById('rewardsModal').style.display = 'none';
         document.getElementById('closeShop').onclick = () => document.getElementById('shopModal').style.display = 'none';
         document.getElementById('closeInventory').onclick = () => document.getElementById('inventoryModal').style.display = 'none';
         document.getElementById('closeBoxes').onclick = () => document.getElementById('boxesModal').style.display = 'none';
@@ -742,13 +872,22 @@
             if(newName) { playerData.name = newName; saveGame(); alert(`Имя изменено на ${newName}`); document.getElementById('accountModal').style.display = 'none'; }
         };
         
-        // Выбор героя на экране выбора
+        // Вкладки героев
+        document.querySelectorAll('.hero-tab').forEach(tab => {
+            tab.onclick = () => {
+                document.querySelectorAll('.hero-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                renderHeroDetail(tab.dataset.hero);
+            };
+        });
+        
+        // Выбор героя на экране дуэли
         document.querySelectorAll('.hero-select-btn').forEach(btn => {
             btn.onclick = () => {
                 document.querySelectorAll('.hero-select-btn').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 selectedHeroForDuel = btn.dataset.hero;
-                updateHeroCard(selectedHeroForDuel);
+                updateHeroCardForSelect(selectedHeroForDuel);
                 document.getElementById('heroCard').style.display = 'block';
                 document.getElementById('confirmHeroBtn').style.display = 'block';
             };
