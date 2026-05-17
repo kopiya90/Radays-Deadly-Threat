@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RADT — Radayce: Deadly Threat</title>
+    <style>
+        * { box-sizing: border-box; user-select: none; }
+        body {
+            font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0f1e 0%, #0f172a 100%);
+            color: #e2e8f0;
+            padding: 16px;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(8px);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #fbbf24, #ef4444);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        .sub {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.7rem;
+            margin-top: -8px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .arena {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            text-align: center;
+        }
+        .hero {
+            flex: 1;
+            background: #1e293b;
+            border-radius: 24px;
+            padding: 16px;
+        }
+        .hp-bar {
+            background: #334155;
+            border-radius: 20px;
+            height: 14px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .hp-fill {
+            background: #22c55e;
+            width: 100%;
+            height: 100%;
+            transition: width 0.2s;
+        }
+        .card-info {
+            font-size: 0.8rem;
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 20px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        select, button {
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+            border-radius: 40px;
+            padding: 12px 16px;
+            font-size: 1rem;
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        button {
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            font-weight: bold;
+        }
+        .log {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            height: 180px;
+            overflow-y: auto;
+        }
+        .log div {
+            border-left: 3px solid #f97316;
+            padding-left: 10px;
+            margin-bottom: 6px;
+        }
+        .vs {
+            font-size: 1.5rem;
+            align-self: center;
+            font-weight: bold;
+            color: #f97316;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #475569;
+            margin-top: 15px;
+        }
+        @media (max-width: 600px) {
+            .arena { flex-direction: column; }
+            .vs { text-align: center; margin: 5px 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1>RADT</h1>
+        <div class="sub">Radayce: Deadly Threat — дуэльный прототип</div>
+        <div class="card-info" id="cardInfo">🎲 Загрузка карты дуэли...</div>
+        <div class="arena">
+            <div class="hero"><h2>🛡️ Айрон</h2><div class="hp-bar"><div class="hp-fill" id="playerHpBar"></div></div><div id="playerHpText">1500 / 1500 HP</div></div>
+            <div class="vs">VS</div>
+            <div class="hero"><h2>👹 Теневой Маг</h2><div class="hp-bar"><div class="hp-fill" id="enemyHpBar"></div></div><div id="enemyHpText">800 / 800 HP</div></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <label>⚔️ Твой ход — выбери действие:</label>
+        <select id="actionSelect"></select>
+        <button id="attackBtn">💥 НАНЕСТИ УДАР</button>
+    </div>
+
+    <div class="card">
+        <div class="log" id="log"></div>
+    </div>
+    <div class="footer">RADT — каждая дуэль уникальна</div>
+</div>
+
+<script>
+    // ----- ГЕРОИ -----
+    let playerHP = 1500;
+    let enemyHP = 800;
+    const playerMax = 1500;
+    const enemyMax = 800;
+
+    // ----- СТИЛИ (атака/защита) -----
+    const styles = [
+        { name: "⚔️ Удар клинком", type: "attack", dmgType: "phys", min: 40, max: 90 },
+        { name: "🔥 Огненная стрела", type: "attack", dmgType: "magic", min: 45, max: 85 },
+        { name: "🛡️ Каменная броня", type: "defense", dmgType: "phys", min: 0, max: 0, effect: "defPhys" },
+        { name: "🔮 Магический щит", type: "defense", dmgType: "magic", min: 0, max: 0, effect: "defMagic" },
+        { name: "🧠 Блок заклинаний", type: "defense", dmgType: "spell", min: 0, max: 0, effect: "defSpell" },
+        { name: "💥 Сокрушитель", type: "attack", dmgType: "phys", min: 50, max: 100 }
+    ];
+
+    // ----- КАРТЫ ДУЭЛИ -----
+    const cards = [
+        { name: "🍄 Магические грибы", effect: "range", min: 5, max: 200 },
+        { name: "⚔️ Стальной ветер", effect: "physBonus", bonus: 0.3 },
+        { name: "🔮 Разрыв магии", effect: "noSpells" },
+        { name: "❄️ Вечная мерзлота", effect: "freeze" },
+        { name: "🛡️ Несокрушимость", effect: "halfDmg" }
+    ];
+
+    let currentCard = null;
+    let freezeNext = false;
+    let logDiv = document.getElementById('log');
+    let actionSelect = document.getElementById('actionSelect');
+
+    function addLog(msg) {
+        let entry = document.createElement('div');
+        entry.innerHTML = msg;
+        logDiv.appendChild(entry);
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    function updateUI() {
+        document.getElementById('playerHpBar').style.width = `${(playerHP/playerMax)*100}%`;
+        document.getElementById('enemyHpBar').style.width = `${(enemyHP/enemyMax)*100}%`;
+        document.getElementById('playerHpText').innerText = `${Math.max(0, playerHP)} / ${playerMax} HP`;
+        document.getElementById('enemyHpText').innerText = `${Math.max(0, enemyHP)} / ${enemyMax} HP`;
+    }
+
+    function getDamage(style, isPlayer) {
+        let min = style.min, max = style.max;
+        if (currentCard?.effect === "range") {
+            min = currentCard.min;
+            max = currentCard.max;
+        }
+        if (currentCard?.effect === "halfDmg") {
+            min = Math.floor(min / 2);
+            max = Math.floor(max / 2);
+        }
+        if (min === max) return min;
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    function getMultiplier(playerStyle, enemyStyle) {
+        if (playerStyle.type === "attack" && playerStyle.dmgType === "phys" && enemyStyle.effect === "defPhys") return 0.5;
+        if (playerStyle.type === "attack" && playerStyle.dmgType === "phys" && enemyStyle.effect === "defMagic") return 1.5;
+        if (playerStyle.type === "attack" && playerStyle.dmgType === "magic" && enemyStyle.effect === "defMagic") return 0.5;
+        if (playerStyle.type === "attack" && playerStyle.dmgType === "magic" && enemyStyle.effect === "defPhys") return 1.5;
+        return 1.0;
+    }
+
+    function enemyChooseStyle() {
+        let r = Math.random();
+        if (currentCard?.effect === "noSpells") return styles[Math.floor(Math.random() * 4)]; // без заклинаний
+        if (r < 0.6) return styles[Math.floor(Math.random() * styles.length)];
+        return styles[0];
+    }
+
+    function startDuel() {
+        playerHP = playerMax;
+        enemyHP = enemyMax;
+        currentCard = cards[Math.floor(Math.random() * cards.length)];
+        document.getElementById('cardInfo').innerHTML = `🎴 КАРТА ДУЭЛИ: ${currentCard.name} — ${currentCard.effect === "range" ? `урон ${currentCard.min}-${currentCard.max}` : currentCard.effect}`;
+        freezeNext = false;
+        updateUI();
+        logDiv.innerHTML = '';
+        addLog(`⚔️ ДУЭЛЬ НАЧАЛАСЬ (RADT — Radayce: Deadly Threat)`);
+        addLog(`🎴 Карта: ${currentCard.name}`);
+    }
+
+    document.getElementById('attackBtn').onclick = () => {
+        if (playerHP <= 0 || enemyHP <= 0) {
+            addLog(`❌ Дуэль уже завершена. Обнови страницу для новой игры.`);
+            return;
+        }
+
+        if (freezeNext) {
+            addLog(`❄️ Вечная мерзлота: ты пропускаешь ход!`);
+            freezeNext = false;
+            let enemyStyle = enemyChooseStyle();
+            addLog(`👹 Теневой Маг использует ${enemyStyle.name} (урон 0, твой ход пропущен)`);
+            updateUI();
+            return;
+        }
+
+        let playerStyle = styles[actionSelect.value];
+        let enemyStyle = enemyChooseStyle();
+
+        let mult = getMultiplier(playerStyle, enemyStyle);
+        let playerDmg = 0, enemyDmg = 0;
+
+        if (playerStyle.type === "attack") {
+            playerDmg = Math.floor(getDamage(playerStyle, true) * mult);
+            if (currentCard?.effect === "physBonus" && playerStyle.dmgType === "phys") playerDmg = Math.floor(playerDmg * (1 + currentCard.bonus));
+            addLog(`🗡️ Ты: ${playerStyle.name} → урон ${playerDmg}`);
+        } else {
+            addLog(`🛡️ Ты: ${playerStyle.name} (защита, урон 0)`);
+        }
+
+        if (enemyStyle.type === "attack") {
+            enemyDmg = getDamage(enemyStyle, false);
+            if (currentCard?.effect === "physBonus" && enemyStyle.dmgType === "phys") enemyDmg = Math.floor(enemyDmg * (1 + currentCard.bonus));
+            addLog(`👹 Враг: ${enemyStyle.name} → урон ${enemyDmg}`);
+        } else {
+            addLog(`🛡️ Враг: ${enemyStyle.name} (защита, урон 0)`);
+        }
+
+        playerHP -= enemyDmg;
+        enemyHP -= playerDmg;
+        updateUI();
+
+        addLog(`❤️ Твой HP: ${Math.max(0, playerHP)} | Враг HP: ${Math.max(0, enemyHP)}`);
+
+        if (currentCard?.effect === "freeze") {
+            freezeNext = true;
+            addLog(`❄️ Вечная мерзлота: следующий ход ты пропустишь!`);
+        }
+
+        if (playerHP <= 0 && enemyHP <= 0) addLog(`💀 НИЧЬЯ! Оба пали в бою 💀`);
+        else if (playerHP <= 0) addLog(`💀 ПОРАЖЕНИЕ... Твой герой повержен 💀`);
+        else if (enemyHP <= 0) addLog(`🏆 ПОБЕДА! Враг уничтожен! Слава RADT! 🏆`);
+    };
+
+    styles.forEach((s, idx) => {
+        let opt = document.createElement('option');
+        opt.value = idx;
+        opt.text = s.name;
+        actionSelect.appendChild(opt);
+    });
+
+    startDuel();
+</script>
+</body>
+</html>
